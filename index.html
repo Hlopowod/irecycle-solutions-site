@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iRecycle Solutions Ltd — IT Recycling Rugby</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --teal:#3DFFD0;
+  --teal-mid:#1FC9A4;
+  --teal-dark:#0B5C47;
+  --teal-light:#E4FFF8;
+  --teal-pale:#F0FFFB;
+  --black:#080C0B;
+  --coal:#101814;
+  --coal2:#182220;
+  --white:#FFFFFF;
+  --offwhite:#F7FDFB;
+  --light:#EEF9F5;
+  --grey:#6A9A8E;
+  --ink:#1A2E28;
+  --ink-light:#3D5A52;
+  --border:rgba(61,255,208,0.18);
+  --border-dark:rgba(61,255,208,0.1);
+  --border-light:rgba(11,92,71,0.1);
+}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{background:var(--white);color:var(--ink);font-family:'DM Sans',sans-serif;overflow-x:hidden}
+
+/* ── LOGO WATERMARK ── */
+.logo-wm{position:absolute;pointer-events:none;user-select:none;z-index:0}
+.logo-wm svg{display:block}
+
+/* ── CURSOR ── */
+.cursor{position:fixed;width:9px;height:9px;background:var(--teal-dark);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform .1s}
+.cursor-ring{position:fixed;width:36px;height:36px;border:1.5px solid rgba(11,92,71,.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .18s ease}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:500;display:flex;align-items:center;justify-content:space-between;padding:1.4rem 4rem;transition:all .3s}
+nav.scrolled{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border-light);padding:1rem 4rem;box-shadow:0 1px 24px rgba(0,0,0,.06)}
+nav.scrolled .nav-links a{color:var(--ink-light)}
+nav.scrolled .nav-links a:hover{color:var(--teal-dark)}
+nav.scrolled .nav-logo-text{color:var(--ink)}
+.nav-logo{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo-icon{width:36px;height:36px}
+.nav-logo-text{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;color:var(--white);letter-spacing:-.01em;transition:color .3s}
+.nav-logo-text span{color:var(--teal)}
+nav.scrolled .nav-logo-text span{color:var(--teal-dark)}
+.nav-links{display:flex;gap:2.5rem;list-style:none}
+.nav-links a{text-decoration:none;color:rgba(255,255,255,.7);font-size:.82rem;letter-spacing:.04em;font-weight:500;transition:color .2s;position:relative}
+.nav-links a::after{content:'';position:absolute;bottom:-3px;left:0;width:0;height:1px;background:var(--teal);transition:width .3s}
+.nav-links a:hover{color:var(--teal)}
+.nav-links a:hover::after{width:100%}
+.nav-book{background:var(--teal);color:var(--black);border:none;padding:.6rem 1.5rem;font-family:'Space Grotesk',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:all .2s;border-radius:2px}
+.nav-book:hover{background:var(--teal-dark);color:var(--white);transform:translateY(-1px)}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px}
+.hamburger span{display:block;width:22px;height:1.5px;background:var(--white);transition:all .3s}
+nav.scrolled .hamburger span{background:var(--ink)}
+.mob-nav{display:none;position:fixed;inset:0;background:var(--coal);z-index:490;flex-direction:column;align-items:center;justify-content:center;gap:2rem}
+.mob-nav.open{display:flex}
+.mob-nav a{text-decoration:none;color:var(--white);font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:700;transition:color .2s}
+.mob-nav a:hover{color:var(--teal)}
+.mob-close{position:absolute;top:2rem;right:2rem;background:none;border:none;color:var(--white);font-size:1.5rem;cursor:pointer}
+
+/* ── HERO (dark — first impression) ── */
+#hero{min-height:100vh;background:var(--coal);position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
+#hero-three{position:absolute;inset:0;z-index:1}
+.hero-bg-text{position:absolute;bottom:-0.15em;left:-.03em;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(7rem,18vw,20rem);line-height:1;color:transparent;-webkit-text-stroke:1px rgba(61,255,208,0.06);letter-spacing:-.04em;z-index:2;white-space:nowrap;pointer-events:none;user-select:none}
+/* Hero logo watermark */
+.hero-logo-wm{position:absolute;right:-5%;top:50%;transform:translateY(-50%);z-index:2;opacity:.04;pointer-events:none}
+.hero-inner{position:relative;z-index:10;padding:0 4rem 6rem;max-width:100%}
+.hero-tag{display:inline-flex;align-items:center;gap:.6rem;background:rgba(61,255,208,.07);border:1px solid rgba(61,255,208,.18);color:var(--teal);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;padding:.35rem .9rem;margin-bottom:2rem;font-family:'Space Grotesk',sans-serif;font-weight:600}
+.hero-tag-dot{width:6px;height:6px;background:var(--teal);border-radius:50%;animation:blink 1.4s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(3rem,7vw,7rem);font-weight:700;line-height:.95;letter-spacing:-.03em;color:var(--white);margin-bottom:2rem;max-width:900px}
+h1 em{font-style:normal;color:var(--teal);display:block}
+.hero-sub{font-size:clamp(.95rem,1.4vw,1.15rem);color:rgba(255,255,255,.5);max-width:480px;line-height:1.75;margin-bottom:3rem;font-weight:300}
+.hero-ctas{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap}
+.cta-main{background:var(--teal);color:var(--black);border:none;padding:1rem 2.4rem;font-family:'Space Grotesk',sans-serif;font-size:.88rem;font-weight:700;letter-spacing:.03em;cursor:pointer;transition:all .2s;border-radius:2px;display:flex;align-items:center;gap:.5rem}
+.cta-main:hover{background:var(--white);transform:translateY(-2px);box-shadow:0 12px 40px rgba(61,255,208,.2)}
+.cta-main svg{transition:transform .2s}
+.cta-main:hover svg{transform:translateX(3px)}
+.cta-ghost{background:transparent;color:var(--white);border:1px solid rgba(255,255,255,.22);padding:1rem 2.4rem;font-family:'Space Grotesk',sans-serif;font-size:.88rem;font-weight:500;cursor:pointer;transition:all .2s;border-radius:2px}
+.cta-ghost:hover{border-color:var(--teal);color:var(--teal)}
+.hero-scroll{position:absolute;bottom:2.5rem;right:4rem;z-index:10;display:flex;flex-direction:column;align-items:center;gap:.6rem}
+.hero-scroll span{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3);writing-mode:vertical-lr;font-family:'Space Grotesk',sans-serif}
+.scroll-line{width:1px;height:50px;background:linear-gradient(to bottom,rgba(61,255,208,.45),transparent);animation:scrollAnim 1.8s ease-in-out infinite}
+@keyframes scrollAnim{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* ── STATS STRIP ── */
+.stats-strip{background:var(--teal);display:grid;grid-template-columns:repeat(4,1fr)}
+.strip-stat{padding:2rem 3rem;border-right:1px solid rgba(8,12,11,.1);display:flex;flex-direction:column;gap:.3rem}
+.strip-stat:last-child{border-right:none}
+.strip-num{font-family:'Space Grotesk',sans-serif;font-size:2.4rem;font-weight:700;color:var(--black);line-height:1}
+.strip-label{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(8,12,11,.5);font-weight:600}
+
+/* ── SECTION COMMON ── */
+.section-label{font-family:'Space Grotesk',sans-serif;font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;font-weight:600;display:flex;align-items:center;gap:.7rem;margin-bottom:1.2rem}
+.section-label::before{content:'';display:block;width:24px;height:1.5px}
+h2{font-family:'Space Grotesk',sans-serif;font-size:clamp(2rem,4vw,3.5rem);font-weight:700;line-height:1.05;letter-spacing:-.02em;margin-bottom:1rem;color:var(--ink)}
+
+/* ── ABOUT / SPLIT (light left, white right) ── */
+#about{display:grid;grid-template-columns:.86fr 1.14fr;min-height:86vh;background:var(--white);border-bottom:1px solid rgba(11,92,71,.08)}
+.about-left{background:linear-gradient(135deg,#ECFAF5 0%,#F8FFFC 62%,#FFFFFF 100%);padding:7rem 5rem;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;color:var(--ink)}
+.about-left::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 88% 12%,rgba(61,255,208,.28),transparent 0 28%),linear-gradient(120deg,rgba(11,92,71,.06),transparent 45%);pointer-events:none}
+/* About logo watermark on light bg */
+.about-wm{position:absolute;bottom:-40px;left:-40px;opacity:.035;pointer-events:none}
+.about-left>*{position:relative;z-index:1}
+.about-left .section-label{color:var(--teal-dark)}
+.about-left .section-label::before{background:var(--teal-dark)}
+.about-left h2{color:var(--ink)}
+.about-left p{color:#3B6258;line-height:1.8;font-size:1rem;max-width:500px;margin-top:1.15rem;font-weight:300}
+.about-proof{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(11,92,71,.12);margin-top:3rem;border:1px solid rgba(11,92,71,.12)}
+.proof-item{background:rgba(255,255,255,.78);padding:1.35rem 1.15rem;backdrop-filter:blur(12px)}
+.proof-item strong{display:block;font-family:'Space Grotesk',sans-serif;font-size:1.8rem;line-height:1;color:var(--teal-dark);letter-spacing:-.04em}
+.proof-item span{display:block;margin-top:.55rem;color:#58756E;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
+.about-status{display:flex;align-items:center;gap:.75rem;margin-top:1.35rem;color:#21443A;font-size:.86rem;font-weight:600}
+.status-dot{width:9px;height:9px;border-radius:999px;background:var(--teal);box-shadow:0 0 0 7px rgba(61,255,208,.16)}
+.about-right{background:var(--white);padding:7rem 4.5rem;display:flex;flex-direction:column;justify-content:center}
+.about-right .section-label{color:var(--teal-dark)}
+.about-right .section-label::before{background:var(--teal-dark)}
+.feature-list{margin-top:2.8rem;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.feature-item{display:block;padding:1.45rem;border:1px solid rgba(11,92,71,.11);background:#FAFEFC;border-radius:12px;box-shadow:0 16px 40px rgba(8,12,11,.04);transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
+.feature-item:hover{transform:translateY(-3px);border-color:rgba(61,255,208,.48);box-shadow:0 22px 60px rgba(11,92,71,.09)}
+.feature-icon{width:48px;height:48px;min-width:48px;margin-bottom:1.15rem;background:linear-gradient(135deg,var(--teal),#BFFFF0);color:#063B2F;display:flex;align-items:center;justify-content:center;border-radius:12px;box-shadow:0 10px 24px rgba(61,255,208,.22)}
+.feature-icon svg{width:23px;height:23px;stroke:currentColor;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.feature-item h4{font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:700;margin-bottom:.45rem;color:var(--ink)}
+.feature-item p{font-size:.86rem;color:#5C7F75;line-height:1.65;font-weight:300}
+
+/* ── SERVICES (white bg, subtle cards) ── */
+#services{background:var(--offwhite);padding:7rem 4rem;position:relative;overflow:hidden}
+/* Services logo watermark */
+.svc-wm{position:absolute;right:-80px;bottom:-80px;opacity:.04;pointer-events:none;z-index:0}
+.services-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:4rem;gap:2rem;flex-wrap:wrap;position:relative;z-index:1}
+.services-header .section-label{color:var(--teal-dark)}
+.services-header .section-label::before{background:var(--teal-dark)}
+.services-header-right{max-width:380px}
+.services-header-right p{color:var(--grey);line-height:1.75;font-weight:300;font-size:.92rem}
+.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5px;background:rgba(11,92,71,.06);position:relative;z-index:1}
+.svc-card{background:var(--white);padding:3rem 2.5rem;position:relative;overflow:hidden;transition:background .3s,box-shadow .3s;cursor:default}
+.svc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;background:linear-gradient(90deg,var(--teal),var(--teal-dark));transform:scaleX(0);transform-origin:left;transition:transform .4s}
+.svc-card:hover{background:var(--teal-pale);box-shadow:0 4px 24px rgba(61,255,208,.12)}
+.svc-card:hover::before{transform:scaleX(1)}
+.svc-num{font-family:'Space Grotesk',sans-serif;font-size:.63rem;letter-spacing:.2em;color:rgba(0,0,0,.15);margin-bottom:1.5rem;font-weight:600}
+.svc-icon{font-size:1.8rem;margin-bottom:1.2rem}
+.svc-card h3{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:.7rem;color:var(--ink)}
+.svc-card p{font-size:.85rem;color:var(--grey);line-height:1.7;font-weight:300}
+.svc-tag{display:inline-block;margin-top:1.4rem;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-dark);background:var(--teal-light);border:1px solid rgba(11,92,71,.15);padding:.25rem .7rem;font-family:'Space Grotesk',sans-serif;font-weight:600}
+
+/* ── ITEMS ── */
+#items{background:var(--coal);padding:7rem 4rem}
+.items-top{display:grid;grid-template-columns:1fr 1fr;gap:4rem;margin-bottom:3.5rem;align-items:end}
+.items-left .section-label{color:var(--teal)}
+.items-left .section-label::before{background:var(--teal)}
+.items-left h2{color:var(--white)}
+.items-right p{color:rgba(255,255,255,.45);line-height:1.8;font-size:.92rem;font-weight:300}
+.items-certs{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.5rem}
+.cert{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);border:1px solid rgba(61,255,208,.25);padding:.3rem .75rem;font-family:'Space Grotesk',sans-serif;font-weight:600}
+.items-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1.5px;background:rgba(61,255,208,.06)}
+.item-cell{background:var(--coal2);padding:1.6rem 1rem;display:flex;flex-direction:column;align-items:center;gap:.6rem;transition:background .25s;cursor:default;border:1px solid transparent;transition:all .2s}
+.item-cell:hover{background:#1A2420;border-color:rgba(61,255,208,.15)}
+.item-cell-icon{font-size:1.6rem}
+.item-cell span{font-size:.72rem;color:rgba(255,255,255,.5);text-align:center;line-height:1.4;font-weight:400}
+
+/* ── WHY ── */
+#why{background:var(--white);padding:7rem 4rem}
+.why-inner{display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:center}
+.why-left .section-label{color:var(--teal-dark)}
+.why-left .section-label::before{background:var(--teal-dark)}
+.why-visual{position:relative;height:450px;background:var(--coal);overflow:hidden;border-radius:2px}
+#why-canvas{width:100%!important;height:100%!important}
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5px;background:rgba(0,0,0,.07);margin-top:3rem}
+.why-card{background:var(--offwhite);padding:2rem}
+.why-big{font-family:'Space Grotesk',sans-serif;font-size:2.5rem;font-weight:700;color:var(--teal-dark);line-height:1}
+.why-sub{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:#8AA8A1;margin-bottom:.7rem;font-weight:600}
+.why-card h4{font-family:'Space Grotesk',sans-serif;font-size:.88rem;font-weight:700;margin-bottom:.4rem}
+.why-card p{font-size:.82rem;color:#5A7070;line-height:1.65;font-weight:300}
+
+/* ── TESTIMONIALS ── */
+#testimonials{background:var(--teal);padding:7rem 4rem}
+.testi-header .section-label{color:rgba(8,12,11,.5)}
+.testi-header .section-label::before{background:var(--black)}
+.testi-header h2{color:var(--black)}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5px;background:rgba(8,12,11,.1);margin-top:3.5rem}
+.testi-card{background:rgba(255,255,255,.9);padding:2.5rem;backdrop-filter:blur(10px)}
+.t-stars{color:var(--teal-dark);font-size:.8rem;margin-bottom:1rem;letter-spacing:.1em}
+.t-quote{font-size:.92rem;line-height:1.78;color:#2A3A35;font-weight:300;margin-bottom:1.5rem;font-style:italic}
+.t-line{width:28px;height:1.5px;background:var(--teal-dark);margin-bottom:1rem}
+.t-name{font-family:'Space Grotesk',sans-serif;font-size:.88rem;font-weight:700;color:var(--black)}
+.t-org{font-size:.75rem;color:#5A7070;margin-top:.15rem}
+
+/* ── FAQ ── */
+#faq{background:var(--coal);padding:7rem 4rem}
+.faq-inner{display:grid;grid-template-columns:1fr 1.8fr;gap:6rem;align-items:start}
+.faq-left .section-label{color:var(--teal)}
+.faq-left .section-label::before{background:var(--teal)}
+.faq-left h2{color:var(--white)}
+.faq-left p{color:rgba(255,255,255,.4);line-height:1.75;margin-top:.8rem;font-size:.9rem;font-weight:300}
+.faq-left-cta{margin-top:2rem;display:inline-flex;align-items:center;gap:.5rem;color:var(--teal);font-family:'Space Grotesk',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;border-bottom:1px solid rgba(61,255,208,.3);padding-bottom:.2rem;transition:border-color .2s}
+.faq-left-cta:hover{border-color:var(--teal)}
+.faq-items{display:flex;flex-direction:column}
+.faq-item{border-bottom:1px solid rgba(61,255,208,.1)}
+.faq-q{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:1.4rem 0;cursor:pointer;color:var(--white);font-family:'Space Grotesk',sans-serif;font-size:.9rem;font-weight:600;transition:color .2s}
+.faq-q:hover{color:var(--teal)}
+.faq-q.open{color:var(--teal)}
+.faq-icon{width:22px;height:22px;border:1px solid rgba(61,255,208,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.75rem;color:var(--teal);transition:all .3s}
+.faq-q.open .faq-icon{background:var(--teal);color:var(--black);transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease;color:rgba(255,255,255,.45);font-size:.87rem;line-height:1.75;font-weight:300}
+.faq-a.open{max-height:200px;padding-bottom:1.4rem}
+
+/* ── CONTACT ── */
+#contact{background:var(--white);padding:7rem 4rem}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:6rem}
+.contact-left .section-label{color:var(--teal-dark)}
+.contact-left .section-label::before{background:var(--teal-dark)}
+.contact-left h2{margin-bottom:1.2rem}
+.contact-left>p{color:#5A7070;line-height:1.75;font-weight:300;font-size:.92rem;margin-bottom:2.5rem}
+.c-detail{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.3rem}
+.c-icon{width:38px;height:38px;min-width:38px;background:rgba(61,255,208,.12);display:flex;align-items:center;justify-content:center;font-size:.95rem;border-radius:2px;border:1px solid rgba(61,255,208,.2)}
+.c-detail strong{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:#8AA8A1;margin-bottom:.15rem;font-weight:600}
+.c-detail span{font-size:.9rem;color:var(--black)}
+.c-map{margin-top:2rem;background:var(--coal);height:180px;position:relative;overflow:hidden;border-radius:2px}
+.c-map-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(61,255,208,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(61,255,208,.07) 1px,transparent 1px);background-size:28px 28px}
+.c-map-pin{position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);font-size:1.8rem}
+.c-map-label{position:absolute;bottom:.8rem;left:50%;transform:translateX(-50%);font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);font-family:'Space Grotesk',sans-serif;font-weight:600;white-space:nowrap}
+.form-group{margin-bottom:1.1rem}
+.form-row2{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.form-group label{display:block;font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:#8AA8A1;margin-bottom:.45rem;font-family:'Space Grotesk',sans-serif;font-weight:600}
+.form-group input,.form-group textarea,.form-group select{width:100%;background:var(--offwhite);border:1.5px solid transparent;color:var(--black);padding:.8rem 1rem;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s;border-radius:2px;appearance:none}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--teal-mid)}
+.form-group textarea{min-height:90px;resize:vertical}
+.form-group select option{background:var(--white)}
+.form-check{display:flex;gap:.7rem;align-items:flex-start;margin-bottom:1.2rem}
+.form-check input{margin-top:.2rem;accent-color:var(--teal-dark)}
+.form-check label{font-size:.8rem;color:#5A7070;line-height:1.5}
+.form-submit{width:100%;background:var(--black);color:var(--white);border:none;padding:.95rem 2rem;font-family:'Space Grotesk',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.05em;cursor:pointer;transition:all .2s;border-radius:2px;display:flex;align-items:center;justify-content:center;gap:.5rem}
+.form-submit:hover{background:var(--teal);color:var(--black);transform:translateY(-1px);box-shadow:0 8px 24px rgba(61,255,208,.3)}
+.form-ok{display:none;background:rgba(61,255,208,.08);border:1px solid rgba(61,255,208,.3);padding:1.2rem;text-align:center;margin-top:1rem;border-radius:2px}
+.form-ok p{color:var(--teal-dark);font-family:'Space Grotesk',sans-serif;font-size:.82rem;font-weight:600}
+
+/* ── FOOTER ── */
+footer{background:var(--black);border-top:1px solid var(--border2)}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding:4rem 4rem 3rem}
+.f-brand p{font-size:.82rem;color:rgba(255,255,255,.35);line-height:1.7;margin-top:.9rem;max-width:220px;font-weight:300}
+.f-col h5{font-family:'Space Grotesk',sans-serif;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);margin-bottom:1.1rem;font-weight:700}
+.f-col ul{list-style:none;display:flex;flex-direction:column;gap:.65rem}
+.f-col ul a{text-decoration:none;color:rgba(255,255,255,.35);font-size:.82rem;transition:color .2s;font-weight:300}
+.f-col ul a:hover{color:var(--teal)}
+.footer-bottom{border-top:1px solid var(--border2);padding:1.3rem 4rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem}
+.footer-bottom p{font-size:.73rem;color:rgba(255,255,255,.25)}
+.f-badges{display:flex;gap:.5rem;flex-wrap:wrap}
+.f-badge{font-size:.6rem;color:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.1);padding:.25rem .65rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Space Grotesk',sans-serif}
+
+/* ── REVEAL ── */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s ease}
+.revealed{opacity:1;transform:none}
+
+/* ── RESPONSIVE ── */
+@media(max-width:960px){
+  nav{padding:1.1rem 1.5rem}
+  nav.scrolled{padding:.9rem 1.5rem}
+  .nav-links,.nav-book{display:none}
+  .hamburger{display:flex}
+  #about{grid-template-columns:1fr}
+  .about-left,.about-right{padding:4rem 2rem}
+  .about-proof,.feature-list{grid-template-columns:1fr}
+  #services,#items,#why,#testimonials,#faq,#contact{padding:5rem 1.5rem}
+  .services-header{flex-direction:column;align-items:flex-start;margin-bottom:2.5rem}
+  .services-grid{grid-template-columns:1fr 1fr}
+  .stats-strip{grid-template-columns:1fr 1fr}
+  .strip-stat{border-bottom:1px solid rgba(8,12,11,.1);padding:1.3rem 1.5rem}
+  .items-top,.why-inner,.contact-grid,.faq-inner{grid-template-columns:1fr;gap:2.5rem}
+  .items-grid{grid-template-columns:repeat(3,1fr)}
+  .why-visual{height:300px}
+  .why-grid{grid-template-columns:1fr 1fr}
+  .testi-grid{grid-template-columns:1fr}
+  .footer-top{grid-template-columns:1fr 1fr;gap:2rem;padding:2.5rem 1.5rem}
+  .footer-bottom{padding:1rem 1.5rem}
+  h1{font-size:clamp(2.5rem,8vw,4rem)}
+  .hero-inner{padding:0 1.5rem 5rem}
+  .hero-scroll{display:none}
+}
+@media(max-width:540px){
+  .services-grid{grid-template-columns:1fr}
+  .items-grid{grid-template-columns:repeat(2,1fr)}
+  .footer-top{grid-template-columns:1fr}
+  .stats-strip{grid-template-columns:1fr}
+  .form-row2{grid-template-columns:1fr}
+  .hero-bg-text{font-size:5rem}
+}
+@media(prefers-reduced-motion:reduce){.scroll-line,.cursor,.cursor-ring{display:none}}
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a class="nav-logo" href="#hero">
+    <svg class="nav-logo-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="18" cy="18" r="18" fill="#3DFFD0"/>
+      <path d="M9 10h4v16H9V10z" fill="#080C0B"/>
+      <path d="M15 10h7c2.5 0 4.5 2 4.5 4.5S24.5 19 22 19l5 7h-5l-4.5-6.5H19v6.5h-4V10z" fill="#080C0B"/>
+      <path d="M19 13.5h2.5c.8 0 1.5.7 1.5 1.5s-.7 1.5-1.5 1.5H19v-3z" fill="#3DFFD0"/>
+    </svg>
+    <div class="nav-logo-text">i<span>Recycle</span> Solutions</div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#items">We Accept</a></li>
+    <li><a href="#why">Why Us</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <button class="nav-book" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Book Collection</button>
+  <button class="hamburger" onclick="document.getElementById('mob-nav').classList.add('open')" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="mob-nav" id="mob-nav">
+  <button class="mob-close" onclick="document.getElementById('mob-nav').classList.remove('open')">✕</button>
+  <a href="#about" onclick="document.getElementById('mob-nav').classList.remove('open')">About</a>
+  <a href="#services" onclick="document.getElementById('mob-nav').classList.remove('open')">Services</a>
+  <a href="#items" onclick="document.getElementById('mob-nav').classList.remove('open')">We Accept</a>
+  <a href="#why" onclick="document.getElementById('mob-nav').classList.remove('open')">Why Us</a>
+  <a href="#contact" onclick="document.getElementById('mob-nav').classList.remove('open')">Contact</a>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="hero-three"></canvas>
+  <div class="hero-bg-text" aria-hidden="true">iRecycle</div>
+  <div class="hero-inner">
+    <div class="hero-tag"><span class="hero-tag-dot"></span>Rugby, Warwickshire · Est. 2019</div>
+    <h1>IT Equipment.<br><em>Recycled Right.</em></h1>
+    <p class="hero-sub">Professional, certified IT disposal for businesses and households across Warwickshire. Zero landfill. Guaranteed data destruction. Free collection.</p>
+    <div class="hero-ctas">
+      <button class="cta-main" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
+        Book Free Collection
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="cta-ghost" onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'})">See Services</button>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- STATS STRIP -->
+<div class="stats-strip">
+  <div class="strip-stat"><div class="strip-num">12K+</div><div class="strip-label">Devices Recycled</div></div>
+  <div class="strip-stat"><div class="strip-num">98%</div><div class="strip-label">Landfill Diverted</div></div>
+  <div class="strip-stat"><div class="strip-num">48h</div><div class="strip-label">Certificate Issued</div></div>
+  <div class="strip-stat"><div class="strip-num">Free</div><div class="strip-label">Business Collections</div></div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-left">
+    <div class="section-label reveal">About Us</div>
+    <h2 class="reveal">Rugby's Trusted<br>IT Recycling Partner</h2>
+    <p class="reveal">iRecycle Solutions Ltd makes responsible IT disposal simple, secure, and accessible for every business and household in Warwickshire.</p>
+    <div class="about-proof reveal" aria-label="iRecycle operating highlights">
+      <div class="proof-item">
+        <strong>2019</strong>
+        <span>Founded in Rugby</span>
+      </div>
+      <div class="proof-item">
+        <strong>98%</strong>
+        <span>Material recovery</span>
+      </div>
+      <div class="proof-item">
+        <strong>48h</strong>
+        <span>Certificate target</span>
+      </div>
+    </div>
+    <div class="about-status reveal"><span class="status-dot"></span> Licensed collections, secure processing, clear documentation.</div>
+  </div>
+  <div class="about-right">
+    <div class="section-label reveal">Why It Matters</div>
+    <h2 class="reveal">End-of-Life Electronics Deserve Better</h2>
+    <div class="feature-list">
+      <div class="feature-item reveal">
+        <div class="feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path><path d="M12 15v2"></path></svg>
+        </div>
+        <div>
+          <h4>Data Security First</h4>
+          <p>Every storage device is wiped to DoD 5220.22-M standard or physically shredded. You receive a signed certificate within 48 hours.</p>
+        </div>
+      </div>
+      <div class="feature-item reveal">
+        <div class="feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3.1-6.8"></path><path d="M21 4v6h-6"></path><path d="M7 13a5 5 0 0 0 8.5 3.5"></path></svg>
+        </div>
+        <div>
+          <h4>Truly Zero Landfill</h4>
+          <p>98% of all materials we receive are recovered, refurbished, or recycled through WEEE-compliant processes — nothing goes to waste.</p>
+        </div>
+      </div>
+      <div class="feature-item reveal">
+        <div class="feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 3v18"></path><path d="M5 7h14"></path><path d="M6 7l-3 7h6L6 7Z"></path><path d="M18 7l-3 7h6l-3-7Z"></path><path d="M8 21h8"></path></svg>
+        </div>
+        <div>
+          <h4>Fully Licensed & Compliant</h4>
+          <p>Environment Agency licensed waste carrier. Using iRecycle satisfies your legal duty of care under UK WEEE regulations.</p>
+        </div>
+      </div>
+      <div class="feature-item reveal">
+        <div class="feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.4-9.2-8.2C1.3 10.2 2.5 7 5.4 6.2c1.8-.5 3.4.3 4.4 1.7 1-1.4 2.6-2.2 4.4-1.7 2.9.8 4.1 4 2.6 6.6C19 16.6 12 21 12 21Z"></path><path d="M12 9v6"></path><path d="M9 12h6"></path></svg>
+        </div>
+        <div>
+          <h4>Community Refurbishment</h4>
+          <p>Viable equipment is restored and donated to local schools and charities — giving your old tech a meaningful second life.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="services-header">
+    <div>
+      <div class="section-label reveal">What We Do</div>
+      <h2 class="reveal">Our Services</h2>
+    </div>
+    <div class="services-header-right reveal">
+      <p>From a single laptop to a full data centre decommission — we handle every stage securely, compliantly, and with zero landfill as our absolute standard.</p>
+    </div>
+  </div>
+  <div class="services-grid reveal">
+    <div class="svc-card"><div class="svc-num">01</div><div class="svc-icon">🏢</div><h3>Business Clearances</h3><p>Office relocations, IT refreshes, full decommissions — we collect, catalogue and recycle your entire IT estate with zero operational disruption.</p><span class="svc-tag">Free Collection</span></div>
+    <div class="svc-card"><div class="svc-num">02</div><div class="svc-icon">🔐</div><h3>Secure Data Destruction</h3><p>DoD 5220.22-M data wiping and physical hard drive shredding. Signed destruction certificates issued within 48 hours for every device.</p><span class="svc-tag">GDPR Compliant</span></div>
+    <div class="svc-card"><div class="svc-num">03</div><div class="svc-icon">🚶</div><h3>Household Drop-Off</h3><p>Bring old laptops, phones, monitors, or cables to our Rugby centre. No appointment needed for under five items — just walk in.</p><span class="svc-tag">Walk-In Welcome</span></div>
+    <div class="svc-card"><div class="svc-num">04</div><div class="svc-icon">📋</div><h3>Asset Reporting</h3><p>Full itemised audit trail — serial numbers, wiping method, final disposition, and weight diverted from landfill. ESG-ready reports included.</p><span class="svc-tag">ISO 27001</span></div>
+    <div class="svc-card"><div class="svc-num">05</div><div class="svc-icon">💚</div><h3>Device Refurbishment</h3><p>Working equipment is restored and donated to Warwickshire schools and charities — extending your old tech's useful life in the community.</p><span class="svc-tag">500+ Donated</span></div>
+    <div class="svc-card"><div class="svc-num">06</div><div class="svc-icon">🏭</div><h3>WEEE Compliance</h3><p>We are a fully licensed Environment Agency waste carrier. Every device processed in full WEEE compliance — documented and auditable.</p><span class="svc-tag">EA Licensed</span></div>
+  </div>
+</section>
+
+<!-- ITEMS -->
+<section id="items">
+  <div class="items-top">
+    <div class="items-left">
+      <div class="section-label reveal">Accepted Equipment</div>
+      <h2 class="reveal">If It Plugs In,<br>We Take It</h2>
+      <div class="items-certs reveal">
+        <span class="cert">WEEE Reg.</span>
+        <span class="cert">EA Licensed</span>
+        <span class="cert">GDPR</span>
+        <span class="cert">ISO 27001</span>
+      </div>
+    </div>
+    <div class="items-right reveal">
+      <p>We accept virtually all IT and consumer electronics — from enterprise server stacks to a single USB cable. Not sure? Just ask — if we can handle it responsibly, we will. Serving Rugby, Coventry, Leamington Spa, Nuneaton, Warwick and beyond.</p>
+    </div>
+  </div>
+  <div class="items-grid reveal">
+    <div class="item-cell"><div class="item-cell-icon">💻</div><span>Laptops</span></div>
+    <div class="item-cell"><div class="item-cell-icon">🖥️</div><span>Desktops</span></div>
+    <div class="item-cell"><div class="item-cell-icon">📱</div><span>Phones</span></div>
+    <div class="item-cell"><div class="item-cell-icon">📟</div><span>Tablets</span></div>
+    <div class="item-cell"><div class="item-cell-icon">🖨️</div><span>Printers</span></div>
+    <div class="item-cell"><div class="item-cell-icon">🖱️</div><span>Monitors</span></div>
+    <div class="item-cell"><div class="item-cell-icon">⌨️</div><span>Keyboards</span></div>
+    <div class="item-cell"><div class="item-cell-icon">💾</div><span>Hard Drives</span></div>
+    <div class="item-cell"><div class="item-cell-icon">📷</div><span>Cameras</span></div>
+    <div class="item-cell"><div class="item-cell-icon">🔋</div><span>Batteries</span></div>
+    <div class="item-cell"><div class="item-cell-icon">📡</div><span>Networking</span></div>
+    <div class="item-cell"><div class="item-cell-icon">🔌</div><span>Cables</span></div>
+    <div class="item-cell"><div class="item-cell-icon">📺</div><span>TVs</span></div>
+    <div class="item-cell"><div class="item-cell-icon">🎮</div><span>Consoles</span></div>
+    <div class="item-cell"><div class="item-cell-icon">🖧</div><span>Servers</span></div>
+    <div class="item-cell"><div class="item-cell-icon">📠</div><span>Telephones</span></div>
+    <div class="item-cell"><div class="item-cell-icon">🔧</div><span>Components</span></div>
+    <div class="item-cell"><div class="item-cell-icon">📻</div><span>AV Equipment</span></div>
+    <div class="item-cell"><div class="item-cell-icon">💿</div><span>Media & Discs</span></div>
+    <div class="item-cell"><div class="item-cell-icon">🖲️</div><span>UPS Units</span></div>
+  </div>
+</section>
+
+<!-- WHY -->
+<section id="why">
+  <div class="why-inner">
+    <div class="why-left">
+      <div class="section-label reveal">By The Numbers</div>
+      <h2 class="reveal">Why Businesses Choose iRecycle</h2>
+      <p class="reveal" style="color:#5A7070;line-height:1.75;font-size:.92rem;font-weight:300">From single SMEs to large corporate IT departments — here's what we deliver, every time.</p>
+      <div class="why-grid reveal">
+        <div class="why-card"><div class="why-big">98%</div><div class="why-sub">Diversion Rate</div><h4>Near-Zero Landfill</h4><p>Almost every gram of material we receive is recovered or reused.</p></div>
+        <div class="why-card"><div class="why-big">48h</div><div class="why-sub">Turnaround</div><h4>Fast Certification</h4><p>Signed data destruction certificate within two working days.</p></div>
+        <div class="why-card"><div class="why-big">£0</div><div class="why-sub">Collection Cost</div><h4>Free for Business</h4><p>All Warwickshire business collections — completely free, always.</p></div>
+        <div class="why-card"><div class="why-big">500+</div><div class="why-sub">Donated Devices</div><h4>Community Impact</h4><p>Refurbished devices donated to local schools and charities.</p></div>
+      </div>
+    </div>
+    <div class="why-visual reveal">
+      <canvas id="why-canvas"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="testi-header reveal">
+    <div class="section-label">Client Feedback</div>
+    <h2>Trusted Across Warwickshire</h2>
+  </div>
+  <div class="testi-grid reveal">
+    <div class="testi-card">
+      <div class="t-stars">★★★★★</div>
+      <div class="t-quote">We decommissioned 60 workstations and iRecycle handled everything — collection, wiping, certificates — all within one week. Genuinely painless from start to finish.</div>
+      <div class="t-line"></div>
+      <div class="t-name">James R.</div>
+      <div class="t-org">IT Manager, Rugby Manufacturing Ltd</div>
+    </div>
+    <div class="testi-card">
+      <div class="t-stars">★★★★★</div>
+      <div class="t-quote">As a school, data security is paramount. iRecycle gave us the certificates we needed and even donated a dozen refurbished laptops back to us. An outstanding service.</div>
+      <div class="t-line"></div>
+      <div class="t-name">Sarah K.</div>
+      <div class="t-org">Head of IT, Warwickshire Academy</div>
+    </div>
+    <div class="testi-card">
+      <div class="t-stars">★★★★★</div>
+      <div class="t-quote">Dropped off a box of old phones and cables — no appointment, no fuss. The team were friendly and immediately reassured me everything would be handled properly.</div>
+      <div class="t-line"></div>
+      <div class="t-name">Mark P.</div>
+      <div class="t-org">Household customer, Coventry</div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="faq-inner">
+    <div class="faq-left reveal">
+      <div class="section-label">Common Questions</div>
+      <h2 style="color:var(--white)">Got a Question?</h2>
+      <p>Can't find the answer here? Call us or send an email — we respond to every enquiry within one working day.</p>
+      <div class="faq-left-cta" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Contact us directly →</div>
+    </div>
+    <div class="faq-items reveal">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Is business collection really free? <span class="faq-icon">+</span></div>
+        <div class="faq-a">Yes — for all business and commercial collections anywhere in Warwickshire, there is no collection charge whatsoever. Household drop-offs at our Rugby centre are also completely free.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">How do I know my data is actually destroyed? <span class="faq-icon">+</span></div>
+        <div class="faq-a">We issue a signed data destruction certificate for every storage device we process, listing the serial number, wiping standard used, and date of destruction. This is your legal proof of compliance.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Do I need to wipe devices before handing them over? <span class="faq-icon">+</span></div>
+        <div class="faq-a">No — in fact, please don't. Some software wiping can interfere with our certified processes. Just send or bring the devices as-is. We handle all data destruction to the correct standard.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Are you licensed to handle our waste legally? <span class="faq-icon">+</span></div>
+        <div class="faq-a">Yes. iRecycle Solutions Ltd is a fully licensed Environment Agency waste carrier and registered WEEE handler. Using us satisfies your legal duty of care under UK waste legislation — we supply documentation to prove it.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Can I get an ESG or sustainability report? <span class="faq-icon">+</span></div>
+        <div class="faq-a">Absolutely. Our asset reporting service provides a full itemised manifest including device type, serial number, disposal method, and total weight diverted from landfill — ready for your ESG or sustainability report.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Do you cover areas outside Rugby? <span class="faq-icon">+</span></div>
+        <div class="faq-a">Yes — we regularly collect from Coventry, Leamington Spa, Nuneaton, Warwick, Stratford-upon-Avon and surrounding areas. For locations further afield, get in touch and we'll do our best to accommodate you.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-grid">
+    <div class="contact-left reveal">
+      <div class="section-label">Get In Touch</div>
+      <h2>Book Your Free<br>Collection Today</h2>
+      <p>Whether it's one machine or a full office fit-out — we'll arrange everything. Business collections are always free and we respond within one working day.</p>
+      <div class="c-detail"><div class="c-icon">📍</div><div><strong>Address</strong><span>iRecycle Solutions Ltd, Rugby, Warwickshire, CV21</span></div></div>
+      <div class="c-detail"><div class="c-icon">📞</div><div><strong>Phone</strong><span>01788 000 000</span></div></div>
+      <div class="c-detail"><div class="c-icon">✉️</div><div><strong>Email</strong><span>hello@irecycle-solutions.co.uk</span></div></div>
+      <div class="c-detail"><div class="c-icon">🕐</div><div><strong>Hours</strong><span>Mon–Fri 8am–6pm · Sat 9am–2pm</span></div></div>
+      <div class="c-map"><div class="c-map-grid"></div><div class="c-map-pin">📍</div><div class="c-map-label">Rugby · Warwickshire · CV21</div></div>
+    </div>
+    <div class="reveal">
+      <form onsubmit="submitForm(event)">
+        <div class="form-row2">
+          <div class="form-group"><label>First Name</label><input type="text" placeholder="Jane" required></div>
+          <div class="form-group"><label>Last Name</label><input type="text" placeholder="Smith" required></div>
+        </div>
+        <div class="form-group"><label>Email</label><input type="email" placeholder="jane@company.co.uk" required></div>
+        <div class="form-group"><label>Phone</label><input type="tel" placeholder="07700 000 000"></div>
+        <div class="form-group"><label>Organisation</label><input type="text" placeholder="Acme Ltd (optional)"></div>
+        <div class="form-group">
+          <label>Service</label>
+          <select required>
+            <option value="">Select a service…</option>
+            <option>Business Collection (Free)</option>
+            <option>Household Drop-Off</option>
+            <option>Secure Data Destruction</option>
+            <option>Full Office Clearance</option>
+            <option>Asset Reporting</option>
+            <option>Other Enquiry</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Tell Us What You Have</label><textarea placeholder="e.g. 20 laptops, 5 monitors, 2 servers from an office refresh in Coventry."></textarea></div>
+        <div class="form-check"><input type="checkbox" id="gdpr" required><label for="gdpr">I agree to iRecycle Solutions contacting me about my enquiry. We never share your data with third parties.</label></div>
+        <button type="submit" class="form-submit">Send Enquiry <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="form-ok" id="form-ok"><p>✓ Enquiry received — we'll be in touch within one working day.</p></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="f-brand">
+      <a class="nav-logo" href="#hero" style="text-decoration:none">
+        <svg width="30" height="30" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="18" fill="#3DFFD0"/><path d="M9 10h4v16H9V10z" fill="#080C0B"/><path d="M15 10h7c2.5 0 4.5 2 4.5 4.5S24.5 19 22 19l5 7h-5l-4.5-6.5H19v6.5h-4V10z" fill="#080C0B"/><path d="M19 13.5h2.5c.8 0 1.5.7 1.5 1.5s-.7 1.5-1.5 1.5H19v-3z" fill="#3DFFD0"/></svg>
+        <div class="nav-logo-text">i<span>Recycle</span> Solutions</div>
+      </a>
+      <p>Rugby's specialist IT recycling centre — responsibly processing end-of-life electronics since 2019.</p>
+    </div>
+    <div class="f-col">
+      <h5>Services</h5>
+      <ul>
+        <li><a href="#services">Business Clearances</a></li>
+        <li><a href="#services">Data Destruction</a></li>
+        <li><a href="#services">Household Drop-Off</a></li>
+        <li><a href="#services">Asset Reporting</a></li>
+        <li><a href="#services">Refurbishment</a></li>
+      </ul>
+    </div>
+    <div class="f-col">
+      <h5>Company</h5>
+      <ul>
+        <li><a href="#about">About Us</a></li>
+        <li><a href="#why">Why iRecycle</a></li>
+        <li><a href="#testimonials">Reviews</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+    <div class="f-col">
+      <h5>Contact</h5>
+      <ul>
+        <li><a href="tel:017880000000">01788 000 000</a></li>
+        <li><a href="mailto:hello@irecycle-solutions.co.uk">hello@irecycle-solutions.co.uk</a></li>
+        <li><a href="#contact">Rugby, CV21</a></li>
+        <li><a href="#contact">Mon–Fri 8am–6pm</a></li>
+        <li><a href="#contact">Sat 9am–2pm</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 iRecycle Solutions Ltd, Rugby. All rights reserved.</p>
+    <div class="f-badges">
+      <span class="f-badge">WEEE Reg.</span>
+      <span class="f-badge">EA Licensed</span>
+      <span class="f-badge">GDPR</span>
+      <span class="f-badge">ISO 27001</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ── CURSOR ── */
+const cur=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px'});
+(function animRing(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing)})();
+document.querySelectorAll('button,a,.svc-card,.faq-q').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.transform='translate(-50%,-50%) scale(1.6)';cur.style.transform='translate(-50%,-50%) scale(0.5)'});
+  el.addEventListener('mouseleave',()=>{ring.style.transform='translate(-50%,-50%) scale(1)';cur.style.transform='translate(-50%,-50%) scale(1)'});
+});
+
+/* ── NAV SCROLL ── */
+window.addEventListener('scroll',()=>{
+  document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>60);
+});
+
+/* ── FAQ ── */
+function toggleFaq(el){
+  const isOpen=el.classList.contains('open');
+  document.querySelectorAll('.faq-q.open').forEach(q=>{q.classList.remove('open');q.nextElementSibling.classList.remove('open')});
+  if(!isOpen){el.classList.add('open');el.nextElementSibling.classList.add('open')}
+}
+
+/* ── FORM ── */
+function submitForm(e){e.preventDefault();document.getElementById('form-ok').style.display='block';e.target.querySelector('.form-submit').style.display='none'}
+
+/* ── REVEAL ── */
+const revEls=document.querySelectorAll('.reveal');
+new IntersectionObserver((entries)=>{entries.forEach((e,i)=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('revealed'),i*60);revEls.forEach(x=>{})}})},{threshold:.1}).observe && (() => {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e,i) => {
+      if(e.isIntersecting){ setTimeout(()=>e.target.classList.add('revealed'), i * 55); obs.unobserve(e.target); }
+    });
+  }, {threshold:.08});
+  revEls.forEach(el => obs.observe(el));
+})();
+
+/* ── HERO THREE.JS ── */
+(function(){
+  const canvas=document.getElementById('hero-three');
+  const section=document.getElementById('hero');
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(50,1,0.1,200);
+  camera.position.set(0,0,8);
+
+  // Main iR sphere — teal wireframe
+  const geo=new THREE.IcosahedronGeometry(2.5,3);
+  const mat=new THREE.MeshBasicMaterial({color:0x3DFFD0,wireframe:true,opacity:.18,transparent:true});
+  const mesh=new THREE.Mesh(geo,mat);
+  scene.add(mesh);
+
+  // Inner solid — subtle
+  const geo2=new THREE.IcosahedronGeometry(2.3,2);
+  const mat2=new THREE.MeshBasicMaterial({color:0x1FC9A4,wireframe:true,opacity:.06,transparent:true});
+  scene.add(new THREE.Mesh(geo2,mat2));
+
+  // Orbit rings
+  [3.2,3.8,4.4].forEach((r,i)=>{
+    const rg=new THREE.TorusGeometry(r,.004+i*.002,8,80);
+    const rm=new THREE.MeshBasicMaterial({color:0x3DFFD0,opacity:.12-i*.03,transparent:true});
+    const ring=new THREE.Mesh(rg,rm);
+    ring.rotation.x=Math.PI/3+i*0.4;ring.rotation.y=i*0.6;
+    scene.add(ring);
+  });
+
+  // Nodes
+  const nGeo=new THREE.SphereGeometry(.035,6,6);
+  const nMat=new THREE.MeshBasicMaterial({color:0x3DFFD0});
+  const posAttr=geo.attributes.position;
+  const seen=new Set();
+  for(let i=0;i<posAttr.count;i++){
+    const x=posAttr.getX(i),y=posAttr.getY(i),z=posAttr.getZ(i);
+    const k=`${x.toFixed(1)}_${y.toFixed(1)}_${z.toFixed(1)}`;
+    if(!seen.has(k)){seen.add(k);const n=new THREE.Mesh(nGeo,nMat);n.position.set(x,y,z);mesh.add(n);}
+  }
+
+  // Particle cloud
+  const pN=250,pPos=new Float32Array(pN*3);
+  for(let i=0;i<pN*3;i++)pPos[i]=(Math.random()-.5)*20;
+  const pGeo=new THREE.BufferGeometry();pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
+  scene.add(new THREE.Points(pGeo,new THREE.PointsMaterial({color:0x1FC9A4,size:.04,opacity:.4,transparent:true})));
+
+  function resize(){
+    const w=section.clientWidth,h=section.clientHeight;
+    renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();
+  }
+  resize();window.addEventListener('resize',resize);
+
+  // Parallax
+  let targetX=0,targetY=0;
+  document.addEventListener('mousemove',e=>{targetX=(e.clientX/window.innerWidth-.5)*.8;targetY=(e.clientY/window.innerHeight-.5)*.5;});
+
+  let t=0;
+  (function animate(){
+    requestAnimationFrame(animate);t+=.004;
+    mesh.rotation.y=t*.25+targetX*.3;
+    mesh.rotation.x=t*.12+targetY*.2;
+    camera.position.x+=(targetX*.6-camera.position.x)*.03;
+    camera.position.y+=(-targetY*.4-camera.position.y)*.03;
+    scene.children.forEach((c,i)=>{if(c.geometry&&c.geometry.type==='TorusGeometry'){c.rotation.z=t*(0.08+i*.03);}});
+    renderer.render(scene,camera);
+  })();
+})();
+
+/* ── WHY 3D SPHERE ── */
+(function(){
+  const canvas=document.getElementById('why-canvas');
+  const container=canvas.parentElement;
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(45,1,.1,100);
+  camera.position.set(0,0,5.5);
+
+  // Earth-like sphere with teal tones
+  const geo=new THREE.SphereGeometry(1.9,32,20);
+  const mat=new THREE.MeshBasicMaterial({color:0x0A4A3A,wireframe:false,opacity:1});
+  const sphere=new THREE.Mesh(geo,mat);scene.add(sphere);
+
+  const wireGeo=new THREE.SphereGeometry(1.92,20,14);
+  const wireMat=new THREE.MeshBasicMaterial({color:0x3DFFD0,wireframe:true,opacity:.2,transparent:true});
+  scene.add(new THREE.Mesh(wireGeo,wireMat));
+
+  // Orbiting particles representing devices
+  const orbits=[];
+  for(let i=0;i<8;i++){
+    const angle=Math.random()*Math.PI*2;const elev=(Math.random()-.5)*Math.PI;
+    const r=2.3+Math.random()*.6;
+    const pGeo=new THREE.SphereGeometry(.07,6,6);
+    const pMat=new THREE.MeshBasicMaterial({color:i%2===0?0x3DFFD0:0xFFFFFF});
+    const p=new THREE.Mesh(pGeo,pMat);
+    scene.add(p);orbits.push({mesh:p,r,angle,elev,spd:0.008+Math.random()*.012});
+  }
+
+  // glow rings
+  [2.4,2.8].forEach((r,i)=>{
+    const rg=new THREE.TorusGeometry(r,.003,8,80);
+    const rm=new THREE.MeshBasicMaterial({color:0x3DFFD0,opacity:.15-i*.05,transparent:true});
+    const ring=new THREE.Mesh(rg,rm);ring.rotation.x=i===0?Math.PI/4:Math.PI/6;
+    scene.add(ring);
+  });
+
+  function resize(){const w=container.clientWidth,h=container.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();}
+  resize();window.addEventListener('resize',resize);
+  let t=0;
+  (function animate(){requestAnimationFrame(animate);t+=.005;
+    sphere.rotation.y=t*.15;
+    orbits.forEach(o=>{o.angle+=o.spd;o.mesh.position.x=Math.cos(o.angle)*o.r*Math.cos(o.elev);o.mesh.position.y=Math.sin(o.elev)*o.r;o.mesh.position.z=Math.sin(o.angle)*o.r*Math.cos(o.elev);});
+    renderer.render(scene,camera);})();
+})();
+
+</script>
+</body>
+</html>
